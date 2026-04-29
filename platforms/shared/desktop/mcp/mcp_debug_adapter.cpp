@@ -571,6 +571,8 @@ json DebugAdapter::GetMediaInfo()
     json info;
     Media* media = m_core->GetMedia();
 
+    info["emulator"] = GG_TITLE;
+    info["emulator_version"] = GG_VERSION;
     info["ready"] = media->IsReady();
     info["file_path"] = media->GetFilePath();
     info["file_name"] = media->GetFileName();
