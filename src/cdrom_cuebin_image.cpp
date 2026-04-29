@@ -172,7 +172,7 @@ bool CdRomCueBinImage::ReadSector(u32 lba, u8* buffer)
 
             if (byte_offset + sector_size > img_file->file_size)
             {
-                Error("ReadSector failed - Byte offset %llu + sector size %d exceeds file size %d",
+                Error("ReadSector failed - Byte offset %u + sector size %u exceeds file size %u",
                     byte_offset, sector_size, img_file->file_size);
                 return false;
             }
@@ -232,7 +232,7 @@ bool CdRomCueBinImage::ReadSamples(u32 lba, u32 offset, s16* buffer, u32 count)
 
             if (byte_offset + size > img_file->file_size)
             {
-                Error("ReadBytes failed - Byte offset %llu + size %d exceeds file size %d",
+                Error("ReadBytes failed - Byte offset %u + size %u exceeds file size %u",
                     byte_offset, size, img_file->file_size);
                 return false;
             }
@@ -307,7 +307,7 @@ bool CdRomCueBinImage::PreloadTrack(u32 track_number)
     u32 start_chunk = start_offset / track_file.img_file->chunk_size;
     u32 chunks_needed = (total_bytes + track_file.img_file->chunk_size - 1) / track_file.img_file->chunk_size;
 
-    Debug("Preloading all sectors for track %d (sectors: %d, bytes: %llu)", track_number, track.sector_count, total_bytes);
+    Debug("Preloading all sectors for track %u (sectors: %u, bytes: %u)", track_number, track.sector_count, total_bytes);
 
     return PreloadChunks(track_file.img_file, start_chunk, chunks_needed);
 }
@@ -865,7 +865,7 @@ bool CdRomCueBinImage::ParseCueFile(const char* cue_content)
         if (last_size % last.sector_size != 0)
         {
             Log("WARNING: Last track has remaining bytes that do not fit into a full sector:");
-            Log("File size: %u, File offset: %llu, Sector size: %u", f.img_file->file_size, last.file_offset, last.sector_size);
+            Log("File size: %u, File offset: %u, Sector size: %u", f.img_file->file_size, last.file_offset, last.sector_size);
             last.sector_count++;
         }
 
@@ -877,13 +877,13 @@ bool CdRomCueBinImage::ParseCueFile(const char* cue_content)
     {
         Track& track = m_toc.tracks[i];
 
-        Log("Track %2d (%s): Start LBA: %6u, End LBA: %6u, Sectors: %6u, File Offset: %8llu",
-                i + 1,
-                TrackTypeName(track.type),
-                track.start_lba,
-                track.end_lba,
-                track.sector_count,
-                track.file_offset);
+        Log("Track %2d (%s): Start LBA: %6u, End LBA: %6u, Sectors: %6u, File Offset: %8u",
+            (int)(i + 1),
+            TrackTypeName(track.type),
+            track.start_lba,
+            track.end_lba,
+            track.sector_count,
+            track.file_offset);
     }
 
     Log("Successfully parsed CUE file with %d tracks", (int)m_toc.tracks.size());
@@ -916,7 +916,7 @@ bool CdRomCueBinImage::ReadFromImgFile(ImgFile* img_file, u32 offset, u8* buffer
 
     if (offset + size > img_file->file_size)
     {
-        Error("ReadFromImgFile failed - Offset %llu + size %d exceeds file size %d",
+        Error("ReadFromImgFile failed - Offset %u + size %u exceeds file size %u",
             offset, size, img_file->file_size);
         return false;
     }
@@ -994,7 +994,7 @@ bool CdRomCueBinImage::LoadChunk(ImgFile* img_file, u32 chunk_index)
 
         if (file.fail())
         {
-            Error("Cannot load chunk - Failed to seek to offset %llu in file %s", file_offset, img_file->file_path);
+            Error("Cannot load chunk - Failed to seek to offset %u in file %s", file_offset, img_file->file_path);
             return false;
         }
 
