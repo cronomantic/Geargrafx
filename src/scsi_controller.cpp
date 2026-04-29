@@ -608,18 +608,18 @@ void ScsiController::CommandReadTOC()
                 track = 1;
 
             u8 type = 0x04;
-
-            if (m_cdrom_media->GetTrackType(track - 1) == GG_CDROM_AUDIO_TRACK)
-                type = 0x00;
-
+            u8 track_count = m_cdrom_media->GetTrackCount();
             GG_CdRomMSF start_msf = { 0, 0, 0 };
-            if (track > m_cdrom_media->GetTrackCount())
+            if (track > track_count)
             {
                 start_msf = m_cdrom_media->GetCdRomLength();
                 type = 0x00;
             }
             else
             {
+                if (m_cdrom_media->GetTrackType(track - 1) == GG_CDROM_AUDIO_TRACK)
+                    type = 0x00;
+
                 u32 first_sector = m_cdrom_media->GetFirstSectorOfTrack(track - 1);
                 u32 start_lba = first_sector + 150;
                 LbaToMsf(start_lba, &start_msf);
