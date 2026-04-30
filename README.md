@@ -8,7 +8,7 @@
 [![License](https://img.shields.io/github/license/drhelius/Geargrafx)](https://github.com/drhelius/Geargrafx/blob/main/LICENSE)
 [![Twitter Follow](https://img.shields.io/twitter/follow/drhelius)](https://x.com/drhelius)
 
-Geargrafx is a very accurate cross-platform TurboGrafx-16 / PC Engine / SuperGrafx / PCE CD-ROM² emulator written in C++ that runs on Windows, macOS, Linux, BSD and RetroArch, with an embedded MCP server for debugging and tooling.
+Geargrafx is a very accurate, cross-platform TurboGrafx-16 / PC Engine / SuperGrafx / PCE CD-ROM² emulator written in C++ that runs on Windows, macOS, Linux, BSD and RetroArch, with an embedded MCP server for debugging and tooling.
 
 This is an open source project with its ongoing development made possible thanks to the support by these awesome [backers](backers.md). If you find it useful, please consider [sponsoring](https://github.com/sponsors/drhelius).
 
@@ -102,10 +102,10 @@ Don't hesitate to report bugs or ask for new features by [opening an issue](http
 - Standard Gamepad (2 buttons), Avenue Pad 3 (3 buttons, auto-configured based on game), Avenue Pad 6 (6 buttons) and Mouse.
 - Adjustable scanline count (224p, 240p or manual).
 - RGB or Composite color output with optional LPF filter.
-- Compressed rom and CD images support (pce, sgx, cue, zip and chd).
-- Music rom support: HES.
+- Compressed ROM and CD image support (pce, sgx, cue, zip and chd).
+- Music ROM support: HES.
 - VGM recorder.
-- Internal database for automatic rom detection and hardware selection if `Auto` options are selected.
+- Internal database for automatic ROM detection and hardware selection if `Auto` options are selected.
 - Supported platforms (standalone): Windows, Linux, BSD and macOS.
 - Supported platforms (libretro): Windows, Linux, macOS, Raspberry Pi, Android, iOS, tvOS, webOS, PlayStation Vita, PlayStation 3, Nintendo 3DS, Nintendo GameCube, Nintendo Wii, Nintendo WiiU, Nintendo Switch, Emscripten, Classic Mini systems (NES, SNES, C64, ...), OpenDingux, RetroFW and QNX.
 - Full debugger with just-in-time disassembler, CPU breakpoints, memory access breakpoints, code navigation (goto address, JP JR and JSR double clicking), debug symbols, automatic labels, memory editor, PSG inspector and video viewer including registers, tiles, sprites, backgrounds, CD-ROM sub-systems and both VDCs in SuperGrafx mode.
@@ -118,7 +118,7 @@ Don't hesitate to report bugs or ask for new features by [opening an issue](http
 ## Tips
 
 ### Basic Usage
-- **BIOS**: Geargrafx requires a BIOS to run CD-ROM games. It is possible to load any BIOS but the System Card 3.0 with md5 ```38179df8f4ac870017db21ebcbf53114``` is recommended.
+- **BIOS**: Geargrafx requires a BIOS to run CD-ROM games. It is possible to load any BIOS but the System Card 3.0 with md5 `38179df8f4ac870017db21ebcbf53114` is recommended.
 - **CD-ROM Images**: Geargrafx supports `chd`, zipped and unzipped `cue/bin`, `cue/img` and `cue/iso` images. `cue/iso + wav` is also supported when audio track format is 44100Hz, 16 bit, stereo. It does not support MP3 or OGG audio tracks.
 - **Mouse Cursor**: Automatically hides when hovering over the main output window or when Main Menu is disabled.
 - **Portable Mode**: Create an empty file named `portable.ini` in the same directory as the application binary to enable portable mode.
@@ -126,8 +126,8 @@ Don't hesitate to report bugs or ask for new features by [opening an issue](http
 ### Debugging Features
 - **Docking Windows**: In debug mode, you can dock windows together by pressing SHIFT and dragging a window onto another.
 - **Multi-viewport**: In Windows or macOS, you can enable "multi-viewport" in the debug menu. You must restart the emulator for the change to take effect. Once enabled, you can drag debugger windows outside the main window.
-- **Single Instance**: You can enable "Single Instance" in the ```Emulator``` menu. When enabled, opening a ROM while another instance is running will send the ROM to the running instance instead of starting a new one.
-- **Debug Symbols**: The emulator automatically tries to load a symbol file when loading a ROM (.sym, .lbl, .noi). For example, for ```path_to_rom_file.rom``` it tries to load ```path_to_rom_file.sym```. You can also load symbol files using the GUI or the CLI. It supports PCEAS (old and new format), wla-dx and vasm file formats.
+- **Single Instance**: You can enable "Single Instance" in the `Emulator` menu. When enabled, opening a ROM while another instance is running will send the ROM to the running instance instead of starting a new one.
+- **Debug Symbols**: The emulator automatically tries to load a symbol file when loading a ROM (.sym, .lbl, .noi). For example, for `path_to_rom_file.rom` it tries to load `path_to_rom_file.sym`. You can also load symbol files using the GUI or the CLI. It supports PCEAS (old and new format), wla-dx and vasm file formats.
 
 ### Command Line Usage
 ```
@@ -150,7 +150,7 @@ Options:
 
 ### MCP Server
 
-Geargrafx includes a [Model Context Protocol](https://modelcontextprotocol.io/introduction) (MCP) server that enables AI-assisted debugging through AI agents like GitHub Copilot, Claude, Codex and similar. The server provides tools for execution control, memory inspection, breakpoints, disassembly, hardware status, sprite viewing, and more.
+Geargrafx includes a [Model Context Protocol](https://modelcontextprotocol.io/introduction) (MCP) server that enables AI-assisted debugging through AI agents like GitHub Copilot, Claude, Codex and similar. The server provides tools for execution control, memory inspection, breakpoints, disassembly, hardware status, rewind and more.
 
 For complete setup instructions and tool documentation, see [MCP_README.md](MCP_README.md).
 
@@ -199,7 +199,7 @@ make
 For older Ubuntu versions (22.04, 24.04), you need to build SDL3 from source first. Use the following commands to build both SDL3 and Geargrafx:
 
 ``` shell
-sudo apt install build-essential cmake \
+sudo apt install build-essential cmake git curl jq pkg-config \
   libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxfixes-dev \
   libxi-dev libxss-dev libxkbcommon-dev libwayland-dev libdecor-0-dev \
   libdrm-dev libgbm-dev libgl1-mesa-dev libegl1-mesa-dev libdbus-1-dev libudev-dev libxtst-dev
