@@ -110,6 +110,7 @@ bool gui_init(void)
 
     emu_audio_mute(!config_audio.enable);
     emu_audio_huc6280a(config_audio.huc6280a);
+    emu_audio_set_master_volume(config_audio.master_volume);
     emu_audio_psg_volume(config_audio.psg_volume);
     emu_audio_cdrom_volume(config_audio.cdrom_volume);
     emu_audio_adpcm_volume(config_audio.adpcm_volume);
@@ -230,6 +231,10 @@ void gui_shortcut(gui_ShortCutEvent event)
     case gui_ShortcutFFWD:
         config_emulator.ffwd = !config_emulator.ffwd;
         gui_action_ffwd();
+        break;
+    case gui_ShortcutMute:
+        config_audio.enable = !config_audio.enable;
+        emu_audio_mute(!config_audio.enable);
         break;
     case gui_ShortcutSaveState:
     {

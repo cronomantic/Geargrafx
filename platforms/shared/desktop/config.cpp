@@ -157,6 +157,7 @@ static void set_defaults(void)
     config_hotkeys[config_HotkeyIndex_SelectSlot4] = make_hotkey(SDL_SCANCODE_4, SDL_KMOD_CTRL);
     config_hotkeys[config_HotkeyIndex_SelectSlot5] = make_hotkey(SDL_SCANCODE_5, SDL_KMOD_CTRL);
     config_hotkeys[config_HotkeyIndex_CaptureMouse] = make_hotkey(SDL_SCANCODE_F1, SDL_KMOD_NONE);
+    config_hotkeys[config_HotkeyIndex_Mute] = make_hotkey(SDL_SCANCODE_U, SDL_KMOD_CTRL);
 }
 
 void config_init(void)
@@ -398,6 +399,8 @@ void config_read(void)
     config_audio.enable = read_bool("Audio", "Enable", true);
     config_audio.sync = read_bool("Audio", "Sync", true);
     config_audio.huc6280a = read_bool("Audio", "HuC6280A", true);
+    config_audio.master_volume = read_float("Audio", "MasterVolume", 1.0f);
+    config_audio.master_volume = CLAMP(config_audio.master_volume, 0.0f, 2.0f);
     config_audio.psg_volume = read_float("Audio", "PSGVolume", 1.0f);
     config_audio.cdrom_volume = read_float("Audio", "CDROMVolume", 1.0f);
     config_audio.adpcm_volume = read_float("Audio", "ADPCMVolume", 1.0f);
@@ -542,6 +545,7 @@ void config_read(void)
     config_hotkeys[config_HotkeyIndex_SelectSlot3] = read_hotkey("Hotkeys", "SelectSlot3", make_hotkey(SDL_SCANCODE_3, SDL_KMOD_CTRL));
     config_hotkeys[config_HotkeyIndex_SelectSlot4] = read_hotkey("Hotkeys", "SelectSlot4", make_hotkey(SDL_SCANCODE_4, SDL_KMOD_CTRL));
     config_hotkeys[config_HotkeyIndex_SelectSlot5] = read_hotkey("Hotkeys", "SelectSlot5", make_hotkey(SDL_SCANCODE_5, SDL_KMOD_CTRL));
+    config_hotkeys[config_HotkeyIndex_Mute] = read_hotkey("Hotkeys", "Mute", make_hotkey(SDL_SCANCODE_U, SDL_KMOD_CTRL));
 
     Debug("Settings loaded");
 }
@@ -700,6 +704,7 @@ void config_write(void)
     write_bool("Audio", "Enable", config_audio.enable);
     write_bool("Audio", "Sync", config_audio.sync);
     write_bool("Audio", "HuC6280A", config_audio.huc6280a);
+    write_float("Audio", "MasterVolume", config_audio.master_volume);
     write_float("Audio", "PSGVolume", config_audio.psg_volume);
     write_float("Audio", "CDROMVolume", config_audio.cdrom_volume);
     write_float("Audio", "ADPCMVolume", config_audio.adpcm_volume);
@@ -832,6 +837,7 @@ void config_write(void)
     write_hotkey("Hotkeys", "SelectSlot3", config_hotkeys[config_HotkeyIndex_SelectSlot3]);
     write_hotkey("Hotkeys", "SelectSlot4", config_hotkeys[config_HotkeyIndex_SelectSlot4]);
     write_hotkey("Hotkeys", "SelectSlot5", config_hotkeys[config_HotkeyIndex_SelectSlot5]);
+    write_hotkey("Hotkeys", "Mute", config_hotkeys[config_HotkeyIndex_Mute]);
 
     if (config_ini_file->write(config_ini_data, true))
     {

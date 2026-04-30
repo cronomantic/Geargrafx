@@ -33,6 +33,7 @@ Audio::Audio(Adpcm* adpcm, CdRomAudio* cdrom_audio)
     InitPointer(m_trace_logger);
     m_mute = false;
     m_is_cdrom = false;
+    m_master_volume = 1.0f;
     m_psg_volume = 1.0f;
     m_adpcm_volume = 1.0f;
     m_cdrom_volume = 1.0f;
@@ -118,13 +119,9 @@ void Audio::EndFrame(s16* sample_buffer, int* sample_count)
                 mix += (s32)(m_psg_buffer[i] * m_psg_volume);
                 mix += (s32)(m_adpcm_buffer[i] * m_adpcm_volume);
                 mix += (s32)(m_cdrom_buffer[i] * m_cdrom_volume);
+                mix = (s32)((float)mix * m_master_volume);
 
-                if (mix > 32767)
-                    mix = 32767;
-                else if (mix < -32768)
-                    mix = -32768;
-
-                sample_buffer[i] = (s16)mix;
+                sample_buffer[i] = (s16)CLAMP(mix, -32768, 32767);
             }
         }
     }
@@ -142,20 +139,15 @@ void Audio::EndFrame(s16* sample_buffer, int* sample_count)
 
         *sample_count = samples;
 
-        if (m_mute || (m_psg_volume <= 0.0f))
+        if (m_mute || (m_master_volume <= 0.0f) || (m_psg_volume <= 0.0f))
             memset(sample_buffer, 0, sizeof(s16) * samples);
         else
         {
             for (int i = 0; i < samples; i++)
             {
-                s32 mix = (s32)(m_psg_buffer[i] * m_psg_volume);
+                s32 mix = (s32)(m_psg_buffer[i] * m_psg_volume * m_master_volume);
 
-                if (mix > 32767)
-                    mix = 32767;
-                else if (mix < -32768)
-                    mix = -32768;
-
-                sample_buffer[i] = (s16)mix;
+                sample_buffer[i] = (s16)CLAMP(mix, -32768, 32767);
             }
         }
     }

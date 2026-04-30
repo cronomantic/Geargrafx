@@ -62,6 +62,11 @@ INLINE void Audio::Mute(bool mute)
     m_mute = mute;
 }
 
+INLINE void Audio::SetMasterVolume(float volume)
+{
+    m_master_volume = CLAMP(volume, 0.0f, 2.0f);
+}
+
 INLINE void Audio::SetPSGVolume(float volume)
 {
     m_psg_volume = CLAMP(volume, 0.0f, 2.0f);

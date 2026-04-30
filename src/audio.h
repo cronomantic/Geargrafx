@@ -38,6 +38,7 @@ public:
     void Init();
     void Reset(bool cdrom);
     void Mute(bool mute);
+    void SetMasterVolume(float volume);
     void SetPSGVolume(float volume);
     void SetADPCMVolume(float volume);
     void SetCDROMVolume(float volume);
@@ -63,6 +64,7 @@ private:
     s16 m_adpcm_buffer[GG_AUDIO_BUFFER_SIZE] = {};
     s16 m_cdrom_buffer[GG_AUDIO_BUFFER_SIZE] = {};
     u32 m_cycle_counter;
+    float m_master_volume;
     float m_psg_volume;
     float m_adpcm_volume;
     float m_cdrom_volume;

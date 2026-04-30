@@ -109,6 +109,7 @@ struct config_Audio
     bool enable = true;
     bool sync = true;
     bool huc6280a = true;
+    float master_volume = 1.0f;
     float psg_volume = 1.0f;
     float cdrom_volume = 1.0f;
     float adpcm_volume = 1.0f;
@@ -198,6 +199,7 @@ enum config_HotkeyIndex
     config_HotkeyIndex_SelectSlot4,
     config_HotkeyIndex_SelectSlot5,
     config_HotkeyIndex_CaptureMouse,
+    config_HotkeyIndex_Mute,
     config_HotkeyIndex_COUNT
 };
 

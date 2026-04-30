@@ -600,6 +600,7 @@ static void menu_emulator(void)
             hotkey_configuration_item("Save State Slot 4:", &config_hotkeys[config_HotkeyIndex_SelectSlot4]);
             hotkey_configuration_item("Save State Slot 5:", &config_hotkeys[config_HotkeyIndex_SelectSlot5]);
             hotkey_configuration_item("Screenshot:", &config_hotkeys[config_HotkeyIndex_Screenshot]);
+            hotkey_configuration_item("Mute Audio:", &config_hotkeys[config_HotkeyIndex_Mute]);
             hotkey_configuration_item("Fullscreen:", &config_hotkeys[config_HotkeyIndex_Fullscreen]);
             hotkey_configuration_item("Show Main Menu:", &config_hotkeys[config_HotkeyIndex_ShowMainMenu]);
             hotkey_configuration_item("Capture Mouse:", &config_hotkeys[config_HotkeyIndex_CaptureMouse]);
@@ -1185,6 +1186,7 @@ static void menu_input(void)
                         gamepad_configuration_item("Fast Forward:", &config_input_gamepad_shortcuts[i].gamepad_shortcuts[config_HotkeyIndex_FFWD], i);
                         gamepad_configuration_item("Rewind:", &config_input_gamepad_shortcuts[i].gamepad_shortcuts[config_HotkeyIndex_Rewind], i);
                         gamepad_configuration_item("Screenshot:", &config_input_gamepad_shortcuts[i].gamepad_shortcuts[config_HotkeyIndex_Screenshot], i);
+                        gamepad_configuration_item("Mute Audio:", &config_input_gamepad_shortcuts[i].gamepad_shortcuts[config_HotkeyIndex_Mute], i);
 
                         gui_popup_modal_gamepad(i);
 
@@ -1208,7 +1210,7 @@ static void menu_audio(void)
     {
         gui_in_use = true;
 
-        if (ImGui::MenuItem("Enable Audio", "", &config_audio.enable))
+        if (ImGui::MenuItem("Enable Audio", config_hotkeys[config_HotkeyIndex_Mute].str, &config_audio.enable))
         {
             emu_audio_mute(!config_audio.enable);
         }
@@ -1223,6 +1225,25 @@ static void menu_audio(void)
             ImGui::Text("When enabled, this option will emulate the HuC6280A audio chip.");
             ImGui::Text("This chip will reduce clicks and pops in the audio output.");
             ImGui::EndTooltip();
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::BeginMenu("Master Volume", config_audio.enable))
+        {
+            ImGui::PushItemWidth(200.0f);
+            if (ImGui::SliderFloat("##master_volume", &config_audio.master_volume, 0.0f, 2.0f, "Scale = %.2fx", ImGuiSliderFlags_AlwaysClamp))
+            {
+                emu_audio_set_master_volume(config_audio.master_volume);
+            }
+            ImGui::PopItemWidth();
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::BeginTooltip();
+                ImGui::Text("Anything above 1.00 may cause clipping.");
+                ImGui::EndTooltip();
+            }
+            ImGui::EndMenu();
         }
 
         ImGui::Separator();

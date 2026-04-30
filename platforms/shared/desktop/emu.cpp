@@ -386,6 +386,11 @@ void emu_audio_mute(bool mute)
     geargrafx->GetAudio()->Mute(mute);
 }
 
+void emu_audio_set_master_volume(float volume)
+{
+    geargrafx->GetAudio()->SetMasterVolume(volume);
+}
+
 void emu_audio_psg_volume(float volume)
 {
     geargrafx->GetAudio()->SetPSGVolume(volume);
