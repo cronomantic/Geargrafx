@@ -96,9 +96,7 @@ static void draw_transport_bar(void)
     ImGui::BeginDisabled(!can_scrub || at_oldest);
     if (ImGui::Button(ICON_MD_SKIP_PREVIOUS "##rw"))
     {
-        seek_position = snapshot_count - 1;
-        rewind_seek(seek_position);
-        scrubbing = true;
+        gui_debug_rewind_seek(snapshot_count - 1);
     }
     ImGui::EndDisabled();
 
@@ -107,10 +105,7 @@ static void draw_transport_bar(void)
     ImGui::BeginDisabled(!can_scrub || at_oldest);
     if (ImGui::Button(ICON_MD_FAST_REWIND "##rw"))
     {
-        if (seek_position < snapshot_count - 1)
-            seek_position++;
-        rewind_seek(seek_position);
-        scrubbing = true;
+        gui_debug_rewind_seek(seek_position + 1);
     }
     ImGui::EndDisabled();
 
@@ -119,10 +114,7 @@ static void draw_transport_bar(void)
     ImGui::BeginDisabled(!can_scrub || at_newest);
     if (ImGui::Button(ICON_MD_FAST_FORWARD "##rw"))
     {
-        if (seek_position > 0)
-            seek_position--;
-        rewind_seek(seek_position);
-        scrubbing = true;
+        gui_debug_rewind_seek(seek_position - 1);
     }
     ImGui::EndDisabled();
 
@@ -131,9 +123,7 @@ static void draw_transport_bar(void)
     ImGui::BeginDisabled(!can_scrub || at_newest);
     if (ImGui::Button(ICON_MD_SKIP_NEXT "##rw"))
     {
-        seek_position = 0;
-        rewind_seek(seek_position);
-        scrubbing = true;
+        gui_debug_rewind_seek(0);
     }
     ImGui::EndDisabled();
 
@@ -178,8 +168,20 @@ static void draw_timeline(void)
     ImGui::SetNextItemWidth(-1);
     if (ImGui::SliderInt("##rw_timeline", &slider_val, 0, max_age, label))
     {
-        seek_position = max_age - slider_val;
-        rewind_seek(seek_position);
-        scrubbing = true;
+        gui_debug_rewind_seek(max_age - slider_val);
     }
+}
+
+bool gui_debug_rewind_seek(int age)
+{
+    int snapshot_count = rewind_get_snapshot_count();
+    if (age < 0 || age >= snapshot_count)
+        return false;
+
+    if (!rewind_seek(age))
+        return false;
+
+    seek_position = age;
+    scrubbing = true;
+    return true;
 }

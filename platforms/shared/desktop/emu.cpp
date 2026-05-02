@@ -266,9 +266,12 @@ void emu_update(void)
     }
     else
     {
-        rewind_commit_seek();
-        geargrafx->RunToVBlank(emu_frame_buffer, audio_buffer, &sampleCount);
-        frame_executed = true;
+        if (!geargrafx->IsPaused())
+        {
+            rewind_commit_seek();
+            geargrafx->RunToVBlank(emu_frame_buffer, audio_buffer, &sampleCount);
+            frame_executed = true;
+        }
     }
 
     if (frame_executed)
