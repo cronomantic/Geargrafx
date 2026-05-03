@@ -732,7 +732,7 @@ static void finish_loading_rom(void)
     {
         emu_pause();
 
-        for (int i = 0; i < (HUC6270_MAX_RESOLUTION_WIDTH * HUC6270_MAX_RESOLUTION_HEIGHT); i++)
+        for (int i = 0; i < SYSTEM_TEXTURE_WIDTH * SYSTEM_TEXTURE_HEIGHT * 4; i++)
         {
             emu_frame_buffer[i] = 0;
         }
