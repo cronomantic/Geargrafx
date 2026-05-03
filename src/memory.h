@@ -56,6 +56,8 @@ public:
     void Init();
     void Reset();
     u8 Read(u16 address, bool block_transfer = false);
+    bool TryPeek(u16 address, u8* value);
+    bool TryPeek(u16 address, u8 bank, u8* value);
     void Write(u16 address, u8 value, bool block_transfer = false);
     void SetMpr(u8 index, u8 value);
     u8 GetMpr(u8 index);

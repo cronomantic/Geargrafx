@@ -45,6 +45,11 @@ u8 SF2Mapper::Read(u8 bank, u16 address)
     }
 }
 
+u8 SF2Mapper::Peek(u8 bank, u16 address)
+{
+    return SF2Mapper::Read(bank, address);
+}
+
 void SF2Mapper::Write(u8 bank, u16 address, u8 value)
 {
     if ((bank == 0x00) && ((address & 0x1FF0) == 0x1FF0))

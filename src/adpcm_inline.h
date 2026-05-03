@@ -68,14 +68,7 @@ INLINE u8 Adpcm::Read(u16 address)
         case 0x0B:
             return m_dma;
         case 0x0C:
-        {
-            u8 status = 0;
-            status |= (m_playing ? 0x08 : 0x00);
-            status |= (m_end_irq ? 0x01 : 0x00);
-            status |= (m_read_cycles > 0 ? 0x80 : 0x00);
-            status |= (m_write_cycles > 0 ? 0x04 : 0x00);
-            return status;
-        }
+            return GetStatusRegisterSnapshot();
         case 0x0D:
             return m_control;
         case 0x0E:
@@ -84,6 +77,16 @@ INLINE u8 Adpcm::Read(u16 address)
             Debug("ADPCM Read Invalid address: %04X", address);
             return 0;
     }
+}
+
+INLINE u8 Adpcm::GetStatusRegisterSnapshot()
+{
+    u8 status = 0;
+    status |= (m_playing ? 0x08 : 0x00);
+    status |= (m_end_irq ? 0x01 : 0x00);
+    status |= (m_read_cycles > 0 ? 0x80 : 0x00);
+    status |= (m_write_cycles > 0 ? 0x04 : 0x00);
+    return status;
 }
 
 INLINE void Adpcm::Write(u16 address, u8 value)

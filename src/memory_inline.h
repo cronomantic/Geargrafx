@@ -138,6 +138,64 @@ INLINE u8 Memory::Read(u16 address, bool block_transfer)
     return 0xFF;
 }
 
+INLINE bool Memory::TryPeek(u16 address, u8* value)
+{
+#if defined(GG_TESTING)
+    if (!IsValidPointer(value))
+        return false;
+
+    *value = m_test_memory[address];
+    return true;
+#else
+    return TryPeek(address, m_mpr[address >> 13], value);
+#endif
+}
+
+INLINE bool Memory::TryPeek(u16 address, u8 bank, u8* value)
+{
+    if (!IsValidPointer(value))
+        return false;
+
+#if defined(GG_TESTING)
+    *value = m_test_memory[address];
+    return true;
+#else
+    u16 offset = address & 0x1FFF;
+
+    if (bank == 0xFF)
+        return false;
+
+    if (IsValidPointer(m_current_mapper) && (bank < 0x80))
+    {
+        if (m_current_mapper == m_sf2_mapper)
+        {
+            *value = m_sf2_mapper->Peek(bank, offset);
+            return true;
+        }
+
+        if (m_current_mapper == m_arcade_card_mapper)
+        {
+            if (bank >= 0x40 && bank <= 0x43)
+                *value = m_arcade_card_mapper->PeekPortData(bank - 0x40);
+            else if (IsValidPointer(m_memory_map[bank]))
+                *value = m_memory_map[bank][offset];
+            else
+                return false;
+
+            return true;
+        }
+
+        return false;
+    }
+
+    if (!IsValidPointer(m_memory_map[bank]))
+        return false;
+
+    *value = m_memory_map[bank][offset];
+    return true;
+#endif
+}
+
 INLINE void Memory::Write(u16 address, u8 value, bool block_transfer)
 {
 #if defined(GG_TESTING)

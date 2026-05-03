@@ -29,6 +29,12 @@ INLINE u8 ArcadeCardMapper::ReadPortData(u8 port)
     return m_card_memory[address];
 }
 
+INLINE u8 ArcadeCardMapper::PeekPortData(u8 port)
+{
+    u32 address = EffectiveAddress(port);
+    return m_card_memory[address];
+}
+
 INLINE void ArcadeCardMapper::WritePortData(u8 port, u8 value)
 {
     u32 address = EffectiveAddress(port);

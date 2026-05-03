@@ -1308,7 +1308,7 @@ json DebugAdapter::GetADPCMStatus()
     status["frequency_khz"] = frequency;
 
     // Registers
-    u8 status_reg = adpcm->Read(0x0C);
+    u8 status_reg = adpcm->GetStatusRegisterSnapshot();
     ss << std::setw(2) << (int)status_reg;
     status["status_register"] = ss.str();
     ss.str("");

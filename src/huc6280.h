@@ -219,6 +219,8 @@ private:
     u16 AbsoluteIndexedIndirectAddressing();
 
     void PopulateDisassemblerRecord(GG_Disassembler_Record* record, u8 opcode, u16 address);
+    void PopulateUnavailableDisassemblerRecord(GG_Disassembler_Record* record, u16 address);
+    void SetDisassemblerRecordSegment(GG_Disassembler_Record* record);
     void InvalidateOverlappingRecords(u16 address, u8 opcode_size);
 
     void UnofficialOPCode();

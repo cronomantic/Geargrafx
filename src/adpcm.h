@@ -56,6 +56,7 @@ public:
     void SoftReset();
     void Clock(u32 cycles);
     u8 Read(u16 address);
+    u8 GetStatusRegisterSnapshot();
     void Write(u16 address, u8 value);
     int EndFrame(s16* sample_buffer);
     u8* GetRAM();

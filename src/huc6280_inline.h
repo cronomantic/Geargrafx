@@ -529,7 +529,14 @@ INLINE void HuC6280::DisassembleNextOPCode()
 
     assert(IsValidPointer(record));
 
-    u8 opcode = m_memory->Read(address);
+    u8 opcode = 0;
+    if (!m_memory->TryPeek(address, &opcode))
+    {
+        InvalidateOverlappingRecords(address, record->size > 0 ? record->size : 1);
+        PopulateUnavailableDisassemblerRecord(record, address);
+        return;
+    }
+
     u8 opcode_size = k_huc6280_opcode_sizes[opcode];
 
     bool changed = (record->opcodes[0] != opcode);
@@ -537,7 +544,13 @@ INLINE void HuC6280::DisassembleNextOPCode()
 
     for (int i = 1; i < opcode_size; i++)
     {
-        u8 mem_byte = m_memory->Read(address + i);
+        u8 mem_byte = 0;
+        if (!m_memory->TryPeek(address + i, &mem_byte))
+        {
+            InvalidateOverlappingRecords(address, record->size > 0 ? record->size : 1);
+            PopulateUnavailableDisassemblerRecord(record, address);
+            return;
+        }
 
         if (record->opcodes[i] != mem_byte)
         {
@@ -601,6 +614,48 @@ INLINE void HuC6280::InvalidateOverlappingRecords(u16 address, u8 opcode_size)
 #else
     UNUSED(address);
     UNUSED(opcode_size);
+#endif
+}
+
+INLINE void HuC6280::PopulateUnavailableDisassemblerRecord(GG_Disassembler_Record* record, u16 address)
+{
+#if !defined(GG_DISABLE_DISASSEMBLER)
+    record->address = m_memory->GetPhysicalAddress(address);
+    record->bank = m_memory->GetBank(address);
+    strncpy_fit(record->name, "????", sizeof(record->name));
+    strncpy_fit(record->bytes, "?? ", sizeof(record->bytes));
+    record->size = 1;
+    record->opcodes[0] = 0xFF;
+    for (int i = 1; i < 7; i++)
+        record->opcodes[i] = 0;
+    record->jump = false;
+    record->jump_address = 0;
+    record->jump_bank = 0;
+    record->subroutine = false;
+    record->irq = 0;
+    record->has_operand_address = false;
+    record->operand_address = 0;
+    record->operand_is_zp = false;
+
+    if (m_debug_next_irq > 0)
+    {
+        record->irq = m_debug_next_irq;
+        m_debug_next_irq = 0;
+    }
+
+    if (record->irq > 0 && record->irq < 6)
+    {
+        static const char* k_irq_auto_symbol_format[6] = {
+            "????_%02X_%04X", "RESET_%02X_%04X", "NMI_%02X_%04X",
+            "TIMER_IRQ_%02X_%04X", "IRQ1_%02X_%04X", "IRQ2_BRK_%02X_%04X"
+        };
+        snprintf(record->auto_symbol, 64, k_irq_auto_symbol_format[record->irq], record->bank, address);
+    }
+
+    SetDisassemblerRecordSegment(record);
+#else
+    UNUSED(record);
+    UNUSED(address);
 #endif
 }
 
@@ -669,7 +724,7 @@ INLINE void HuC6280::PopulateDisassemblerRecord(GG_Disassembler_Record* record, 
         }
         case GG_OPCode_Type_1b_2b:
         {
-            snprintf(record->name, 64, k_huc6280_opcode_names[opcode].name, op1, op2 | (m_memory->Read(address + 3) << 8));
+            snprintf(record->name, 64, k_huc6280_opcode_names[opcode].name, op1, op2 | (record->opcodes[3] << 8));
             break;
         }
         case GG_OPCode_Type_2b:
@@ -682,7 +737,7 @@ INLINE void HuC6280::PopulateDisassemblerRecord(GG_Disassembler_Record* record, 
         }
         case GG_OPCode_Type_2b_2b_2b:
         {
-            snprintf(record->name, 64, k_huc6280_opcode_names[opcode].name, op1 | (op2 << 8), m_memory->Read(address + 3) | (m_memory->Read(address + 4) << 8), m_memory->Read(address + 5) | (m_memory->Read(address + 6) << 8));
+            snprintf(record->name, 64, k_huc6280_opcode_names[opcode].name, op1 | (op2 << 8), record->opcodes[3] | (record->opcodes[4] << 8), record->opcodes[5] | (record->opcodes[6] << 8));
             break;
         }
         case GG_OPCode_Type_1b_Relative:
@@ -707,7 +762,7 @@ INLINE void HuC6280::PopulateDisassemblerRecord(GG_Disassembler_Record* record, 
         }
         case GG_OPCode_Type_ST0:
         {
-            u8 reg = m_memory->Read(address + 1) & 0x1F;
+            u8 reg = op1 & 0x1F;
             snprintf(record->name, 64, k_huc6280_opcode_names[opcode].name, reg, k_register_names[reg]);
             break;
         }
@@ -757,6 +812,17 @@ INLINE void HuC6280::PopulateDisassemblerRecord(GG_Disassembler_Record* record, 
         }
     }
 
+    SetDisassemblerRecordSegment(record);
+#else
+    UNUSED(record);
+    UNUSED(opcode);
+    UNUSED(address);
+#endif
+}
+
+INLINE void HuC6280::SetDisassemblerRecordSegment(GG_Disassembler_Record* record)
+{
+#if !defined(GG_DISABLE_DISASSEMBLER)
     Memory::MemoryBankType bank_type = m_memory->GetBankType(record->bank);
 
     switch (bank_type)
@@ -788,8 +854,6 @@ INLINE void HuC6280::PopulateDisassemblerRecord(GG_Disassembler_Record* record, 
     }
 #else
     UNUSED(record);
-    UNUSED(opcode);
-    UNUSED(address);
 #endif
 }
 
@@ -814,7 +878,17 @@ inline void HuC6280::DisassembleAhead(u16 start_address, int count, int depth)
         if (!IsValidPointer(record))
             break;
 
-        u8 opcode = m_memory->Read(address);
+        u8 opcode = 0;
+        if (!m_memory->TryPeek(address, &opcode))
+        {
+            InvalidateOverlappingRecords(address, record->size > 0 ? record->size : 1);
+            int saved_irq = m_debug_next_irq;
+            m_debug_next_irq = 0;
+            PopulateUnavailableDisassemblerRecord(record, address);
+            m_debug_next_irq = saved_irq;
+            break;
+        }
+
         u8 opcode_size = k_huc6280_opcode_sizes[opcode];
 
         if ((u32)address + opcode_size > 0xFFFF)
@@ -825,7 +899,17 @@ inline void HuC6280::DisassembleAhead(u16 start_address, int count, int depth)
 
         for (int i = 1; i < opcode_size; i++)
         {
-            u8 mem_byte = m_memory->Read(address + i);
+            u8 mem_byte = 0;
+            if (!m_memory->TryPeek(address + i, &mem_byte))
+            {
+                InvalidateOverlappingRecords(address, record->size > 0 ? record->size : 1);
+                int saved_irq = m_debug_next_irq;
+                m_debug_next_irq = 0;
+                PopulateUnavailableDisassemblerRecord(record, address);
+                m_debug_next_irq = saved_irq;
+                return;
+            }
+
             if (record->opcodes[i] != mem_byte)
             {
                 changed = true;
