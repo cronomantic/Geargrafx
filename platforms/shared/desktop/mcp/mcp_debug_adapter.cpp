@@ -65,6 +65,20 @@ struct DisassemblerBookmark
     char name[32];
 };
 
+static bool NormalizeMemoryAreaAddress(const MemoryAreaInfo& info, u32 address, u32* offset)
+{
+    if (!IsValidPointer(offset) || !IsValidPointer(info.data) || info.size == 0)
+        return false;
+
+    if (address < info.size)
+    {
+        *offset = address;
+        return true;
+    }
+
+    return false;
+}
+
 void DebugAdapter::Pause()
 {
     emu_debug_break();
@@ -2089,12 +2103,48 @@ json DebugAdapter::SelectMemoryRange(int editor, int start_address, int end_addr
         return result;
     }
 
-    gui_debug_memory_select_range(editor, start_address, end_address);
+    MemoryAreaInfo info = GetMemoryAreaInfo(editor);
+    if (!IsValidPointer(info.data) || info.size == 0)
+    {
+        result["error"] = "Memory area unavailable";
+        return result;
+    }
+
+    u32 start_offset = 0;
+    u32 end_offset = 0;
+    if (!NormalizeMemoryAreaAddress(info, (u32)start_address, &start_offset) ||
+        !NormalizeMemoryAreaAddress(info, (u32)end_address, &end_offset))
+    {
+        result["error"] = "Selection range outside memory area";
+        return result;
+    }
+
+    if (start_offset > end_offset)
+        std::swap(start_offset, end_offset);
+
+    if (!gui_debug_memory_select_range(editor, (int)start_offset, (int)end_offset))
+    {
+        result["error"] = "Unable to apply memory selection";
+        return result;
+    }
+
+    int actual_start = -1;
+    int actual_end = -1;
+    gui_debug_memory_get_selection(editor, &actual_start, &actual_end);
+    if (actual_start < 0 || actual_end < actual_start || (u32)actual_end >= info.size)
+    {
+        result["error"] = "Unable to read applied memory selection";
+        return result;
+    }
+
+    std::ostringstream start_ss, end_ss;
+    start_ss << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << (u32)actual_start;
+    end_ss << std::hex << std::uppercase << std::setfill('0') << std::setw(4) << (u32)actual_end;
 
     result["success"] = true;
-    result["editor"] = editor;
-    result["start_address"] = start_address;
-    result["end_address"] = end_address;
+    result["area"] = editor;
+    result["start_address"] = start_ss.str();
+    result["end_address"] = end_ss.str();
 
     return result;
 }
