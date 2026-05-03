@@ -416,6 +416,7 @@ void config_read(void)
     config_rewind.speed = CLAMP(config_rewind.speed, 1.0f, 8.0f);
 
     config_input.turbo_tap = read_bool("Input", "TurboTap", false);
+    config_input.allow_up_down = read_bool("Input", "AllowUpDown", false);
     config_emulator.capture_mouse = read_bool("Input", "CaptureMouse", false);
     config_emulator.mouse_sensitivity = CLAMP(read_int("Input", "MouseSensitivity", 5), 1, 15);
 
@@ -716,6 +717,7 @@ void config_write(void)
     write_float("Rewind", "Speed", config_rewind.speed);
 
     write_bool("Input", "TurboTap", config_input.turbo_tap);
+    write_bool("Input", "AllowUpDown", config_input.allow_up_down);
     write_bool("Input", "CaptureMouse", config_emulator.capture_mouse);
     write_int("Input", "MouseSensitivity", config_emulator.mouse_sensitivity);
 

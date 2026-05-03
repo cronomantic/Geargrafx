@@ -127,6 +127,7 @@ struct config_Rewind
 struct config_Input
 {
     bool turbo_tap = false;
+    bool allow_up_down = false;
     int controller_type[GG_MAX_GAMEPADS];
     int avenue_pad_3_button[GG_MAX_GAMEPADS];
     bool turbo_enabled[GG_MAX_GAMEPADS][2];

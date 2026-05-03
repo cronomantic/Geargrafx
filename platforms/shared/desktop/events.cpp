@@ -38,6 +38,7 @@ static bool events_match_hotkey_scancode(const SDL_Event* event, const config_Ho
 static bool events_is_mouse_controller(int controller);
 static int events_get_mouse_controller(void);
 static Uint16 input_build_state(int controller, bool update_turbo = true);
+static Uint16 input_filter_opposing_directions(int controller, Uint16 state);
 static void input_apply_state(int controller, Uint16 before, Uint16 now);
 
 void events_shortcuts(const SDL_Event* event)
@@ -210,7 +211,7 @@ void events_emu(void)
 
     for (int controller = 0; controller < max_controller; controller++)
     {
-        Uint16 now = input_build_state(controller);
+        Uint16 now = input_filter_opposing_directions(controller, input_build_state(controller));
         Uint16 before = input_last_state[controller];
 
         if (now != before)
@@ -232,7 +233,7 @@ void events_sync_input(void)
 
     for (int controller = 0; controller < GG_MAX_GAMEPADS; controller++)
     {
-        Uint16 now = (controller < max_controller) ? input_build_state(controller, false) : 0;
+        Uint16 now = (controller < max_controller) ? input_filter_opposing_directions(controller, input_build_state(controller, false)) : 0;
         input_apply_state(controller, all_keys, 0);
         input_apply_state(controller, 0, now);
         input_last_state[controller] = now;
@@ -380,6 +381,32 @@ static Uint16 input_build_state(int controller, bool update_turbo)
     }
 
     return ret;
+}
+
+static Uint16 input_filter_opposing_directions(int controller, Uint16 state)
+{
+    if (config_input.allow_up_down)
+        return state;
+
+    Uint16 previous = input_last_state[controller];
+
+    if ((state & GG_KEY_UP) && (state & GG_KEY_DOWN))
+    {
+        if (!(previous & GG_KEY_UP))
+            state = (Uint16)(state & ~GG_KEY_UP);
+        if (!(previous & GG_KEY_DOWN))
+            state = (Uint16)(state & ~GG_KEY_DOWN);
+    }
+
+    if ((state & GG_KEY_LEFT) && (state & GG_KEY_RIGHT))
+    {
+        if (!(previous & GG_KEY_LEFT))
+            state = (Uint16)(state & ~GG_KEY_LEFT);
+        if (!(previous & GG_KEY_RIGHT))
+            state = (Uint16)(state & ~GG_KEY_RIGHT);
+    }
+
+    return state;
 }
 
 static void input_apply_state(int controller, Uint16 before, Uint16 now)

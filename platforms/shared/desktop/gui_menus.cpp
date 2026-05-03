@@ -930,17 +930,6 @@ static void menu_input(void)
     {
         gui_in_use = true;
 
-        if (ImGui::MenuItem("Enable Turbo Tap", "", &config_input.turbo_tap))
-        {
-            emu_set_turbo_tap(config_input.turbo_tap);
-        }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::BeginTooltip();
-            ImGui::Text("It is recommended to keep this option disabled if");
-            ImGui::Text("you are using the emulator in single player only.");
-            ImGui::EndTooltip();
-        }
 
         if (ImGui::BeginMenu("Controller"))
         {
@@ -1198,6 +1187,30 @@ static void menu_input(void)
             }
 
             ImGui::EndMenu();
+        }
+
+        ImGui::Separator();
+
+        if (ImGui::MenuItem("Enable Turbo Tap", "", &config_input.turbo_tap))
+        {
+            emu_set_turbo_tap(config_input.turbo_tap);
+        }
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            ImGui::Text("It is recommended to keep this option disabled if");
+            ImGui::Text("you are using the emulator in single player only.");
+            ImGui::EndTooltip();
+        }
+
+        ImGui::MenuItem("Allow Up+Down / Left+Right", "", &config_input.allow_up_down);
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::BeginTooltip();
+            ImGui::Text("Allow pressing, quickly alternating, or holding");
+            ImGui::Text("both left and right or up and down directions.");
+            ImGui::Text("This may cause movement glitches in certain games.");
+            ImGui::EndTooltip();
         }
 
         ImGui::EndMenu();
