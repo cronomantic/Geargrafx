@@ -2241,7 +2241,19 @@ json DebugAdapter::AddMemoryWatch(int editor, int address, const std::string& no
         return result;
     }
 
-    gui_debug_memory_add_watch(editor, address, notes.c_str(), size);
+    MemoryAreaInfo info = GetMemoryAreaInfo(editor);
+    u32 offset = 0;
+    if (!NormalizeMemoryAreaAddress(info, (u32)address, &offset))
+    {
+        result["error"] = "Watch address outside memory area";
+        return result;
+    }
+
+    if (!gui_debug_memory_add_watch(editor, (int)offset, notes.c_str(), size))
+    {
+        result["error"] = "Unable to add memory watch";
+        return result;
+    }
 
     result["success"] = true;
     result["editor"] = editor;
