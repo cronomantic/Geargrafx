@@ -81,6 +81,8 @@ static int pc_pos = 0;
 static int goto_address_pos = 0;
 static bool add_bookmark_open = false;
 static bool add_symbol_open = false;
+static const int k_symbol_bank_count = 0x100;
+static const int k_symbol_address_count = 0x10000;
 
 static void draw_controls(void);
 static void draw_breakpoints(void);
@@ -110,18 +112,18 @@ static bool symbol_sort_name_desc(const SymbolEntry& a, const SymbolEntry& b);
 
 void gui_debug_disassembler_init(void)
 {
-    fixed_symbols = new DebugSymbol**[0x100];
-    dynamic_symbols = new DebugSymbol**[0x100];
+    fixed_symbols = new DebugSymbol**[k_symbol_bank_count];
+    dynamic_symbols = new DebugSymbol**[k_symbol_bank_count];
 
-    for (int i = 0; i < 0x100; i++)
+    for (int i = 0; i < k_symbol_bank_count; i++)
     {
-        fixed_symbols[i] = new DebugSymbol*[0x10000];
-        dynamic_symbols[i] = new DebugSymbol*[0x10000];
+        fixed_symbols[i] = new DebugSymbol*[k_symbol_address_count];
+        dynamic_symbols[i] = new DebugSymbol*[k_symbol_address_count];
     }
 
-    for (int i = 0; i < 0x100; i++)
+    for (int i = 0; i < k_symbol_bank_count; i++)
     {
-        for (int j = 0; j < 0x10000; j++)
+        for (int j = 0; j < k_symbol_address_count; j++)
         {
             InitPointer(fixed_symbols[i][j]);
             InitPointer(dynamic_symbols[i][j]);
@@ -131,9 +133,12 @@ void gui_debug_disassembler_init(void)
 
 void gui_debug_disassembler_destroy(void)
 {
-    for (int i = 0; i < 0x100; i++)
+    if (!IsValidPointer(fixed_symbols) || !IsValidPointer(dynamic_symbols))
+        return;
+
+    for (int i = 0; i < k_symbol_bank_count; i++)
     {
-        for (int j = 0; j < 0x10000; j++)
+        for (int j = 0; j < k_symbol_address_count; j++)
         {
             SafeDelete(fixed_symbols[i][j]);
             SafeDelete(dynamic_symbols[i][j]);
@@ -155,9 +160,12 @@ void gui_debug_disassembler_reset(void)
 
 void gui_debug_reset_symbols(void)
 {
-    for (int i = 0; i < 0x100; i++)
+    if (!IsValidPointer(fixed_symbols) || !IsValidPointer(dynamic_symbols))
+        return;
+
+    for (int i = 0; i < k_symbol_bank_count; i++)
     {
-        for (int j = 0; j < 0x10000; j++)
+        for (int j = 0; j < k_symbol_address_count; j++)
         {
             SafeDelete(fixed_symbols[i][j]);
             SafeDelete(dynamic_symbols[i][j]);
@@ -950,6 +958,9 @@ static void add_cdrom_symbols()
 
 static void add_symbol(const char* line)
 {
+    if (!IsValidPointer(fixed_symbols) || !IsValidPointer(dynamic_symbols))
+        return;
+
     Debug("Loading symbol %s", line);
 
     DebugSymbol s;
@@ -1033,6 +1044,9 @@ static void add_symbol(const char* line)
             u16 address_value = 0;
             if (parse_hex_string(addr_str.c_str(), addr_str.length(), &address_value))
             {
+                if (bank_value >= k_symbol_bank_count)
+                    return;
+
                 s.bank = bank_value;
                 s.address = address_value;
                 snprintf(s.text, 64, "%s", symbol.c_str());
